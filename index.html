@@ -220,7 +220,7 @@
             letter-spacing: 1px;
         }
 
-        /* Generic Modals */
+        /* Modals Base */
         .modal {
             display: none;
             position: fixed;
@@ -228,7 +228,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.88);
             z-index: 100;
             justify-content: center;
             align-items: center;
@@ -247,48 +247,56 @@
             overflow-y: auto;
         }
 
-        /* Embedded Video Modal Specifics */
+        /* Embedded Video Player Fixed Layout */
         .video-box {
             position: relative;
-            width: 85%;
-            max-width: 850px;
-            background: #000;
+            width: 90%;
+            max-width: 860px;
+            background: #0a0a0a;
             border: 3px solid #ffe600;
-            box-shadow: 0 0 30px rgba(255, 230, 0, 0.4);
+            box-shadow: 0 0 35px rgba(255, 230, 0, 0.5);
             padding: 12px;
             display: flex;
             flex-direction: column;
+            z-index: 105;
         }
 
         .video-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            background: #111;
+            padding: 6px 10px;
+            border: 1px solid #333;
         }
 
         .close-btn {
             background: #ff0000;
             color: #fff;
             border: 2px solid #fff;
-            padding: 4px 12px;
+            padding: 5px 14px;
             font-family: inherit;
             font-weight: bold;
             font-size: 12px;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            z-index: 110;
         }
 
         .close-btn:hover {
             background: #cc0000;
+            transform: scale(1.05);
+            box-shadow: 0 0 10px #ff0000;
         }
 
         iframe {
             width: 100%;
-            height: 460px;
-            border: none;
+            height: 480px;
+            border: 1px solid #222;
+            background: #000;
         }
 
-        /* Lore Cards */
+        /* Lore Cards & Secret Ace Target */
         .lore-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -302,6 +310,7 @@
             padding: 10px;
             background: rgba(15, 15, 15, 0.9);
             font-size: 11px;
+            transition: all 0.2s;
         }
 
         .lore-card h3 {
@@ -317,7 +326,20 @@
             margin-bottom: 6px;
         }
 
-        /* Konami Ace Jumpscare Overlay */
+        /* Secret Interactive Ace Box */
+        .secret-ace-card {
+            border-color: #ff0000 !important;
+            background: rgba(30, 0, 0, 0.8) !important;
+        }
+
+        .secret-ace-card:hover {
+            border-color: #ff0055 !important;
+            background: rgba(60, 0, 0, 0.95) !important;
+            box-shadow: 0 0 15px #ff0000;
+            transform: scale(1.03);
+        }
+
+        /* Ace Jumpscare Overlay */
         #ace-modal {
             display: none;
             position: fixed;
@@ -370,7 +392,7 @@
 
     <!-- Top Floating HUD -->
     <div class="hud-top">
-        <button class="hud-btn" onclick="toggleCRT()">CRT: ON</button>
+        <button id="crt-btn" class="hud-btn" onclick="toggleCRT()">CRT: ON</button>
         <button id="audio-btn" class="hud-btn" onclick="toggleAudio()">MUSIC: ON</button>
     </div>
 
@@ -431,21 +453,21 @@
 
     <!-- 4. Embedded Video Modal -->
     <div id="video-modal" class="modal" onclick="closeVideoOutside(event)">
-        <div class="video-box">
+        <div class="video-box" onclick="event.stopPropagation()">
             <div class="video-header">
-                <span style="color: #ffe600; font-weight: bold; font-size: 11px;">PLAYING MEDIA</span>
-                <button class="close-btn" onclick="closeVideo()">CLOSE [X]</button>
+                <span style="color: #ffe600; font-weight: bold; font-size: 11px; letter-spacing: 1px;">PLAYING MEDIA PREVIEW</span>
+                <button type="button" class="close-btn" onclick="closeVideo(); event.stopPropagation();">✖ CLOSE VIDEO</button>
             </div>
-            <iframe id="video-frame" src="" allow="autoplay"></iframe>
+            <iframe id="video-frame" src="" allow="autoplay" allowfullscreen></iframe>
         </div>
     </div>
 
-    <!-- 5. Lore Dossier Modal -->
+    <!-- 5. Lore Dossier Modal (With Secret Ace Trigger) -->
     <div id="lore-modal" class="modal" onclick="closeLoreOutside(event)">
-        <div class="lore-box modal-box">
+        <div class="lore-box modal-box" onclick="event.stopPropagation()">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <h2 style="color: #ffe600; margin: 0; font-size: 16px;">PARMESAN LORE DOSSIER</h2>
-                <button class="close-btn" onclick="closeLore()">CLOSE [X]</button>
+                <button type="button" class="close-btn" onclick="closeLore()">CLOSE [X]</button>
             </div>
             <div class="lore-grid">
                 <div class="lore-card">
@@ -458,11 +480,14 @@
                     <div class="lore-tag">ROLE: RECON & EXFIL</div>
                     <p>Tactical operative specializing in rapid chopper exfils and squad coordination. Crucial asset in high-stakes branches.</p>
                 </div>
-                <div class="lore-card" style="border-color: #ff0000;">
-                    <h3 style="color: #ff0000;">ACE</h3>
-                    <div class="lore-tag" style="color: #ff0000;">THREAT LEVEL: CRITICAL</div>
+
+                <!-- SECRET CLICKABLE ACE CARD -->
+                <div class="lore-card secret-ace-card" onclick="triggerAceJumpscare(); event.stopPropagation();" onmouseenter="playHoverSFX()">
+                    <h3 style="color: #ff0000;">ACE 👁️</h3>
+                    <div class="lore-tag" style="color: #ff0000;">THREAT LEVEL: CRITICAL [CLICK TO ACCESS]</div>
                     <p>Primary antagonist lurking in dark corridors. Known to subvert game logic and hijack communications.</p>
                 </div>
+
                 <div class="lore-card">
                     <h3>GOATED VIETNAMESE SOLDIER</h3>
                     <div class="lore-tag">ROLE: FRONT-LINE VANGUARD</div>
@@ -472,7 +497,7 @@
         </div>
     </div>
 
-    <!-- 6. Konami Code Ace Jumpscare Modal -->
+    <!-- 6. Ace Scene Modal -->
     <div id="ace-modal" onclick="closeAceModal()">
         <img id="ace-img" src="ace.jpg" alt="HE IS WATCHING">
         <div class="ace-text">HE IS WATCHING.</div>
@@ -611,7 +636,7 @@
         function toggleCRT() {
             playClickSFX();
             const crt = document.getElementById('crt');
-            const btn = event.target;
+            const btn = document.getElementById('crt-btn');
             if (crt.style.display === 'none') {
                 crt.style.display = 'block';
                 btn.innerText = "CRT: ON";
@@ -633,27 +658,8 @@
             }
         }
 
-        // --- FIXED KONAMI CODE EASTER EGG ---
-        const konamiSequence = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
-        let konamiIndex = 0;
-
+        // Secret Ace Trigger & Escape Listener
         document.addEventListener('keydown', (e) => {
-            const key = e.key.toLowerCase();
-            const expectedKey = konamiSequence[konamiIndex];
-
-            if (key === expectedKey) {
-                konamiIndex++;
-                if (konamiIndex === konamiSequence.length) {
-                    triggerAceJumpscare();
-                    konamiIndex = 0;
-                }
-            } else {
-                konamiIndex = 0;
-                if (key === konamiSequence[0]) {
-                    konamiIndex = 1;
-                }
-            }
-
             if (e.key === 'Escape') {
                 closeAceModal();
                 closeVideo();
@@ -662,6 +668,7 @@
         });
 
         function triggerAceJumpscare() {
+            closeLore();
             document.getElementById('ace-modal').style.display = 'flex';
             music.playbackRate = 0.45;
             music.volume = 0.9;
