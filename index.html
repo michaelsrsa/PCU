@@ -238,30 +238,53 @@
         .modal-box {
             position: relative;
             width: 85%;
-            max-width: 800px;
+            max-width: 850px;
             background: #000;
             border: 3px solid #ffe600;
             box-shadow: 0 0 30px rgba(255, 230, 0, 0.3);
             padding: 15px;
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
         }
 
+        /* Embedded Video Modal Specifics */
+        .video-box {
+            position: relative;
+            width: 85%;
+            max-width: 850px;
+            background: #000;
+            border: 3px solid #ffe600;
+            box-shadow: 0 0 30px rgba(255, 230, 0, 0.4);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
         .close-btn {
-            position: absolute;
-            top: -40px;
-            right: 0;
             background: #ff0000;
             color: #fff;
             border: 2px solid #fff;
             padding: 4px 12px;
             font-family: inherit;
             font-weight: bold;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .close-btn:hover {
+            background: #cc0000;
         }
 
         iframe {
             width: 100%;
-            height: 450px;
+            height: 460px;
             border: none;
         }
 
@@ -407,18 +430,23 @@
     </div>
 
     <!-- 4. Embedded Video Modal -->
-    <div id="video-modal" class="modal">
-        <div class="video-box modal-box">
-            <button class="close-btn" onclick="closeVideo()">CLOSE [X]</button>
+    <div id="video-modal" class="modal" onclick="closeVideoOutside(event)">
+        <div class="video-box">
+            <div class="video-header">
+                <span style="color: #ffe600; font-weight: bold; font-size: 11px;">PLAYING MEDIA</span>
+                <button class="close-btn" onclick="closeVideo()">CLOSE [X]</button>
+            </div>
             <iframe id="video-frame" src="" allow="autoplay"></iframe>
         </div>
     </div>
 
     <!-- 5. Lore Dossier Modal -->
-    <div id="lore-modal" class="modal">
+    <div id="lore-modal" class="modal" onclick="closeLoreOutside(event)">
         <div class="lore-box modal-box">
-            <button class="close-btn" onclick="closeLore()">CLOSE [X]</button>
-            <h2 style="color: #ffe600; margin-top:0;">PARMESAN LORE DOSSIER</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h2 style="color: #ffe600; margin: 0; font-size: 16px;">PARMESAN LORE DOSSIER</h2>
+                <button class="close-btn" onclick="closeLore()">CLOSE [X]</button>
+            </div>
             <div class="lore-grid">
                 <div class="lore-card">
                     <h3>PARMESAN</h3>
@@ -535,7 +563,7 @@
             }
         }
 
-        // Video Player
+        // Video Player Modal & Closing Handlers
         function playVideo(driveFileId) {
             playClickSFX();
             const frame = document.getElementById('video-frame');
@@ -556,7 +584,13 @@
             music.volume = 1.0;
         }
 
-        // Lore Modal
+        function closeVideoOutside(e) {
+            if (e.target.id === 'video-modal') {
+                closeVideo();
+            }
+        }
+
+        // Lore Modal & Closing Handlers
         function openLore() {
             playClickSFX();
             document.getElementById('lore-modal').style.display = 'flex';
@@ -565,6 +599,12 @@
         function closeLore() {
             playClickSFX();
             document.getElementById('lore-modal').style.display = 'none';
+        }
+
+        function closeLoreOutside(e) {
+            if (e.target.id === 'lore-modal') {
+                closeLore();
+            }
         }
 
         // HUD Controls
@@ -593,14 +633,15 @@
             }
         }
 
-        // --- KONAMI CODE EASTER EGG ---
-        // Code: ↑ ↑ ↓ ↓ ← → ← → B A
-        const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        // --- FIXED KONAMI CODE EASTER EGG ---
+        const konamiSequence = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
         let konamiIndex = 0;
 
         document.addEventListener('keydown', (e) => {
-            const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-            if (key === konamiSequence[konamiIndex].toLowerCase()) {
+            const key = e.key.toLowerCase();
+            const expectedKey = konamiSequence[konamiIndex];
+
+            if (key === expectedKey) {
                 konamiIndex++;
                 if (konamiIndex === konamiSequence.length) {
                     triggerAceJumpscare();
@@ -608,16 +649,20 @@
                 }
             } else {
                 konamiIndex = 0;
+                if (key === konamiSequence[0]) {
+                    konamiIndex = 1;
+                }
             }
 
             if (e.key === 'Escape') {
                 closeAceModal();
+                closeVideo();
+                closeLore();
             }
         });
 
         function triggerAceJumpscare() {
             document.getElementById('ace-modal').style.display = 'flex';
-            // Slow down music pitch to create eerie distortion
             music.playbackRate = 0.45;
             music.volume = 0.9;
             playClickSFX();
@@ -625,7 +670,6 @@
 
         function closeAceModal() {
             document.getElementById('ace-modal').style.display = 'none';
-            // Restore normal audio playback speed
             music.playbackRate = 1.0;
             music.volume = 1.0;
         }
