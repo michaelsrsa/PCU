@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PARMESAN CINEMATIC UNIVERSE</title>
     <style>
-        /* Base Styling */
+        /* Base Styling & Custom Pixel Heart Cursor */
+        * {
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'><path fill='%23ff0000' d='M2 4h3v2H2zM5 2h3v2H5zM8 4h3v2H8zM11 2h3v2h-3zM1 6h14v3H1zM3 9h10v2H3zM5 11h6v2H5zM7 13h2v2H7z'/></svg>"), auto !important;
+        }
+
         body, html {
             margin: 0;
             padding: 0;
@@ -15,6 +19,21 @@
             background-color: #000;
             font-family: 'Courier New', Courier, monospace;
             color: #fff;
+            user-select: none;
+        }
+
+        /* CRT / VHS Overlay */
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 80;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 3px, 6px 100%;
+            display: block;
         }
 
         /* Custom Background Image */
@@ -29,9 +48,37 @@
             background-position: center;
             opacity: 0.4;
             z-index: 1;
+            transition: filter 0.3s;
         }
 
-        /* Retro "Press Start" Boot Screen */
+        /* Top HUD Controls */
+        .hud-top {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            z-index: 90;
+            display: flex;
+            gap: 10px;
+        }
+
+        .hud-btn {
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #555;
+            color: #fff;
+            padding: 6px 12px;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .hud-btn:hover {
+            border-color: #ffe600;
+            color: #ffe600;
+            transform: scale(1.05);
+        }
+
+        /* Retro Boot Screen */
         #boot-screen {
             position: absolute;
             top: 0;
@@ -44,7 +91,6 @@
             justify-content: center;
             align-items: center;
             z-index: 99;
-            cursor: pointer;
             transition: opacity 0.8s ease-out;
         }
 
@@ -73,18 +119,19 @@
 
         .menu-container {
             border: 4px solid #fff;
-            padding: 25px;
-            background: rgba(0, 0, 0, 0.85);
+            padding: 22px;
+            background: rgba(0, 0, 0, 0.88);
             width: 90%;
             max-width: 520px;
             text-align: center;
-            box-shadow: 0 0 25px rgba(255, 255, 255, 0.25);
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+            transition: border-color 0.4s;
         }
 
         h1 {
-            font-size: 22px;
+            font-size: 20px;
             margin-top: 0;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             letter-spacing: 2px;
             text-shadow: 2px 2px #ff0000;
         }
@@ -96,16 +143,16 @@
         }
 
         .menu-item {
-            padding: 10px;
-            margin: 8px 0;
+            padding: 9px;
+            margin: 7px 0;
             border: 2px solid #555;
-            cursor: pointer;
             transition: all 0.2s;
             font-weight: bold;
             display: block;
             text-decoration: none;
             color: #fff;
             background: rgba(0, 0, 0, 0.6);
+            font-size: 13px;
         }
 
         .menu-item:hover {
@@ -120,42 +167,84 @@
             color: #00ffff;
         }
 
-        .menu-item.sub-btn:hover {
-            border-color: #ffffff;
-            background-color: #003333;
+        .menu-item.slander-btn {
+            border-color: #ff0055;
+            color: #ff0055;
+        }
+
+        .menu-item.slander-btn:hover {
+            border-color: #ff0000;
+            background-color: #330011;
             color: #fff;
+            box-shadow: 0 0 10px #ff0000;
+        }
+
+        /* Parm 5 Hype Station Progress Bar */
+        .hype-box {
+            margin-top: 15px;
+            padding: 8px;
+            border: 1px dashed #666;
+            background: rgba(10, 10, 10, 0.9);
+            font-size: 10px;
+            text-align: left;
+        }
+
+        .hype-title {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            color: #ffe600;
+            font-weight: bold;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 12px;
+            background: #222;
+            border: 1px solid #444;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            width: 0%; /* PARM 5 HYPE LEVEL: 0% */
+            height: 100%;
+            background: #ff0000;
+            box-shadow: 0 0 8px #ff0000;
         }
 
         .footer {
-            margin-top: 15px;
-            font-size: 10px;
-            color: #888;
+            margin-top: 12px;
+            font-size: 9px;
+            color: #777;
             letter-spacing: 1px;
         }
 
-        /* Embedded Video Player Modal */
-        #video-modal {
+        /* Generic Modals */
+        .modal {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.85);
             z-index: 100;
             justify-content: center;
             align-items: center;
             flex-direction: column;
         }
 
-        .video-box {
+        .modal-box {
             position: relative;
             width: 85%;
-            max-width: 850px;
+            max-width: 800px;
             background: #000;
             border: 3px solid #ffe600;
-            box-shadow: 0 0 30px rgba(255, 230, 0, 0.4);
-            padding: 10px;
+            box-shadow: 0 0 30px rgba(255, 230, 0, 0.3);
+            padding: 15px;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .close-btn {
@@ -165,76 +254,255 @@
             background: #ff0000;
             color: #fff;
             border: 2px solid #fff;
-            padding: 5px 15px;
+            padding: 4px 12px;
             font-family: inherit;
             font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close-btn:hover {
-            background: #cc0000;
         }
 
         iframe {
             width: 100%;
-            height: 480px;
+            height: 450px;
             border: none;
+        }
+
+        /* Lore Cards */
+        .lore-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+            text-align: left;
+        }
+
+        .lore-card {
+            border: 2px solid #333;
+            padding: 10px;
+            background: rgba(15, 15, 15, 0.9);
+            font-size: 11px;
+        }
+
+        .lore-card h3 {
+            margin: 0 0 5px 0;
+            color: #00ffff;
+            font-size: 14px;
+        }
+
+        .lore-tag {
+            color: #ffe600;
+            font-weight: bold;
+            font-size: 9px;
+            margin-bottom: 6px;
+        }
+
+        /* Konami Ace Jumpscare Overlay */
+        #ace-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 200;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        #ace-img {
+            max-width: 80%;
+            max-height: 70vh;
+            border: 4px solid #ff0000;
+            box-shadow: 0 0 50px #ff0000;
+            animation: glitch 0.2s infinite alternate;
+        }
+
+        .ace-text {
+            color: #ff0000;
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 20px;
+            letter-spacing: 6px;
+            text-shadow: 0 0 15px #ff0000;
+            animation: pulse 0.5s infinite alternate;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(-3px, 2px); }
+            100% { transform: translate(3px, -2px); }
         }
     </style>
 </head>
 <body>
 
-    <!-- Audio Player -->
+    <!-- Audio Soundtrack -->
     <audio id="bg-music" loop>
         <source src="music.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- 1. Boot Screen -->
-    <div id="boot-screen" onclick="startEngine()">
-        <div class="heart-pointer">♥</div>
-        <div style="font-size: 18px; letter-spacing: 4px; font-weight: bold;">PRESS ANYWHERE TO BOOT</div>
+    <!-- CRT Visual Filter -->
+    <div id="crt" class="crt-overlay"></div>
+
+    <!-- Top Floating HUD -->
+    <div class="hud-top">
+        <button class="hud-btn" onclick="toggleCRT()">CRT: ON</button>
+        <button id="audio-btn" class="hud-btn" onclick="toggleAudio()">MUSIC: ON</button>
     </div>
 
-    <!-- 2. Custom Background -->
-    <div class="background-overlay"></div>
+    <!-- 1. Press Start Boot Screen -->
+    <div id="boot-screen" onclick="startEngine()">
+        <div class="heart-pointer">♥</div>
+        <div style="font-size: 16px; letter-spacing: 4px; font-weight: bold;">PRESS ANYWHERE TO BOOT</div>
+    </div>
 
-    <!-- 3. Interactive Menu Interface -->
+    <!-- 2. Custom Background Overlay -->
+    <div class="background-overlay" id="bg-layer"></div>
+
+    <!-- 3. Interactive Main Menu -->
     <div class="menu-wrapper">
-        <div class="menu-container">
+        <div class="menu-container" id="main-container">
             <h1 id="menu-title">PARMESAN CINEMATIC UNIVERSE</h1>
             
             <!-- MAIN EPISODES MENU -->
             <div id="main-menu" class="menu-list">
-                <a href="#" class="menu-item" onclick="playVideo('1rtz44ZLVs_lbw6hiOE2op1tvFiuLFpRK')">EPISODE 1: THE ORIGIN</a>
-                <a href="#" class="menu-item" onclick="playVideo('11hrY5T2AXGCQPkAv6J4SPC9jVR5jTo34')">EPISODE 2: SECOND GRATE</a>
-                <a href="#" class="menu-item" onclick="playVideo('1u0jas5QXq6ZhBBcYdA9FgHjTCL6QAq3g')">EPISODE 3: VQANGUARD</a>
-                <a href="#" class="menu-item" onclick="playVideo('1OizAwf4YPQmQuGlHWdNfk_-zp1p-I0iP')">EPISODE 4: DEEMOZINE</a>
-                <a href="#" class="menu-item sub-btn" onclick="toggleSubMenu('trailers-menu')">🎬 TRAILERS & EXTRAS</a>
+                <a href="#" class="menu-item" onmouseenter="playHoverSFX()" onclick="playVideo('1rtz44ZLVs_lbw6hiOE2op1tvFiuLFpRK')">EPISODE 1: THE ORIGIN</a>
+                <a href="#" class="menu-item" onmouseenter="playHoverSFX()" onclick="playVideo('11hrY5T2AXGCQPkAv6J4SPC9jVR5jTo34')">EPISODE 2: SECOND GRATE</a>
+                <a href="#" class="menu-item" onmouseenter="playHoverSFX()" onclick="playVideo('1u0jas5QXq6ZhBBcYdA9FgHjTCL6QAq3g')">EPISODE 3: VQANGUARD</a>
+                <a href="#" class="menu-item" onmouseenter="playHoverSFX()" onclick="playVideo('1OizAwf4YPQmQuGlHWdNfk_-zp1p-I0iP')">EPISODE 4: DEEMOZINE</a>
+                <a href="#" class="menu-item sub-btn" onmouseenter="playHoverSFX()" onclick="toggleSubMenu('trailers-menu')">🎬 TRAILERS & EXTRAS</a>
+                <a href="#" class="menu-item sub-btn" onmouseenter="playHoverSFX()" onclick="openLore()">📑 CHARACTER DOSSIER</a>
+                <a href="#" class="menu-item slander-btn" onmouseenter="playHoverSFX()" onclick="toggleSubMenu('slander-menu')">⚡ SRSA SLANDER DOMAIN</a>
             </div>
 
             <!-- TRAILERS & EXTRAS SUB-MENU -->
             <div id="trailers-menu" class="menu-list" style="display: none;">
-                <a href="#" class="menu-item" onclick="playVideo('1rotCBW3nxoJowJQhQRHllyZgAGjIT25i')">PARM 2 TRAILER</a>
-                <a href="#" class="menu-item" onclick="playVideo('10pBG5bT8DbUWOQX_ER-iIVbitMPsiE0P')">PARM 3 TRAILER</a>
-                <a href="#" class="menu-item sub-btn" onclick="toggleSubMenu('main-menu')">⬅ BACK TO MAIN MENU</a>
+                <a href="#" class="menu-item" onmouseenter="playHoverSFX()" onclick="playVideo('1rotCBW3nxoJowJQhQRHllyZgAGjIT25i')">PARM 2 TRAILER</a>
+                <a href="#" class="menu-item" onmouseenter="playHoverSFX()" onclick="playVideo('10pBG5bT8DbUWOQX_ER-iIVbitMPsiE0P')">PARM 3 TRAILER</a>
+                <a href="#" class="menu-item sub-btn" onmouseenter="playHoverSFX()" onclick="toggleSubMenu('main-menu')">⬅ BACK TO MAIN MENU</a>
+            </div>
+
+            <!-- SRSA SLANDER SUB-MENU -->
+            <div id="slander-menu" class="menu-list" style="display: none;">
+                <div style="color: #ff0055; font-size: 11px; margin-bottom: 8px; font-weight: bold;">[ ALTERNATE UNIVERSE DETECTED ]</div>
+                <a href="#" class="menu-item slander-btn" onmouseenter="playHoverSFX()" onclick="alert('SRSA SLANDER 5 video link coming soon!')">SRSA SLANDER 5</a>
+                <a href="#" class="menu-item slander-btn" onmouseenter="playHoverSFX()" onclick="alert('SRSA SLANDER 6 video link coming soon!')">SRSA SLANDER 6</a>
+                <a href="#" class="menu-item sub-btn" onmouseenter="playHoverSFX()" onclick="toggleSubMenu('main-menu')">⬅ BACK TO MAIN MENU</a>
+            </div>
+
+            <!-- PARM 5 HYPE STATION -->
+            <div class="hype-box">
+                <div class="hype-title">
+                    <span>PARMESAN V PRODUCTION:</span>
+                    <span>0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill"></div>
+                </div>
             </div>
 
             <div class="footer">32-MONTHS AGED // AUTISM EXPANSION ACTIVE</div>
         </div>
     </div>
 
-    <!-- 4. Retro Embedded Video Modal -->
-    <div id="video-modal">
-        <div class="video-box">
+    <!-- 4. Embedded Video Modal -->
+    <div id="video-modal" class="modal">
+        <div class="video-box modal-box">
             <button class="close-btn" onclick="closeVideo()">CLOSE [X]</button>
             <iframe id="video-frame" src="" allow="autoplay"></iframe>
         </div>
     </div>
 
+    <!-- 5. Lore Dossier Modal -->
+    <div id="lore-modal" class="modal">
+        <div class="lore-box modal-box">
+            <button class="close-btn" onclick="closeLore()">CLOSE [X]</button>
+            <h2 style="color: #ffe600; margin-top:0;">PARMESAN LORE DOSSIER</h2>
+            <div class="lore-grid">
+                <div class="lore-card">
+                    <h3>PARMESAN</h3>
+                    <div class="lore-tag">STATUS: 32-MONTHS AGED</div>
+                    <p>The central pillar of the universe. Known for high-intensity encounters, dairy-based resilience, and tactical adaptability.</p>
+                </div>
+                <div class="lore-card">
+                    <h3>MIG</h3>
+                    <div class="lore-tag">ROLE: RECON & EXFIL</div>
+                    <p>Tactical operative specializing in rapid chopper exfils and squad coordination. Crucial asset in high-stakes branches.</p>
+                </div>
+                <div class="lore-card" style="border-color: #ff0000;">
+                    <h3 style="color: #ff0000;">ACE</h3>
+                    <div class="lore-tag" style="color: #ff0000;">THREAT LEVEL: CRITICAL</div>
+                    <p>Primary antagonist lurking in dark corridors. Known to subvert game logic and hijack communications.</p>
+                </div>
+                <div class="lore-card">
+                    <h3>GOATED VIETNAMESE SOLDIER</h3>
+                    <div class="lore-tag">ROLE: FRONT-LINE VANGUARD</div>
+                    <p>Elite operative with maximum combat proficiency. Turns the tide of battle whenever airborne or grounded.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Konami Code Ace Jumpscare Modal -->
+    <div id="ace-modal" onclick="closeAceModal()">
+        <img id="ace-img" src="ace.jpg" alt="HE IS WATCHING">
+        <div class="ace-text">HE IS WATCHING.</div>
+        <div style="font-size: 10px; color: #888; margin-top: 15px;">[ CLICK OR PRESS ESCAPE TO CLOSE ]</div>
+    </div>
+
     <script>
         const music = document.getElementById('bg-music');
+        let audioCtx;
+
+        // Initialize Web Audio API Synthesizer for 8-bit Beeps
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Synthesize 8-Bit Hover Blip
+        function playHoverSFX() {
+            try {
+                initAudioContext();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.04);
+                gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.04);
+            } catch(e) {}
+        }
+
+        // Synthesize 8-Bit Click Sound
+        function playClickSFX() {
+            try {
+                initAudioContext();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.08);
+            } catch(e) {}
+        }
 
         function startEngine() {
+            playClickSFX();
             const bootScreen = document.getElementById('boot-screen');
             music.play().catch(e => console.log("Audio play deferred:", e));
             
@@ -244,38 +512,121 @@
             }, 800);
         }
 
-        // Sub-menu switcher (Main Menu <-> Trailers)
+        // Menu Switcher
         function toggleSubMenu(menuId) {
+            playClickSFX();
             document.getElementById('main-menu').style.display = 'none';
             document.getElementById('trailers-menu').style.display = 'none';
+            document.getElementById('slander-menu').style.display = 'none';
             document.getElementById(menuId).style.display = 'block';
 
             const title = document.getElementById('menu-title');
-            if(menuId === 'trailers-menu') {
+            const container = document.getElementById('main-container');
+
+            if (menuId === 'trailers-menu') {
                 title.innerText = "TRAILERS & EXTRAS";
+                container.style.borderColor = "#00ffff";
+            } else if (menuId === 'slander-menu') {
+                title.innerText = "SRSA SLANDER DOMAIN";
+                container.style.borderColor = "#ff0055";
             } else {
                 title.innerText = "PARMESAN CINEMATIC UNIVERSE";
+                container.style.borderColor = "#ffffff";
             }
         }
 
-        // Opens the video modal iframe with background visible
+        // Video Player
         function playVideo(driveFileId) {
+            playClickSFX();
             const frame = document.getElementById('video-frame');
             const modal = document.getElementById('video-modal');
             
             frame.src = `https://drive.google.com/file/d/${driveFileId}/preview`;
             modal.style.display = 'flex';
-            
-            // Lower background soundtrack while video plays
             music.volume = 0.2;
         }
 
         function closeVideo() {
+            playClickSFX();
             const frame = document.getElementById('video-frame');
             const modal = document.getElementById('video-modal');
             
             frame.src = '';
             modal.style.display = 'none';
+            music.volume = 1.0;
+        }
+
+        // Lore Modal
+        function openLore() {
+            playClickSFX();
+            document.getElementById('lore-modal').style.display = 'flex';
+        }
+
+        function closeLore() {
+            playClickSFX();
+            document.getElementById('lore-modal').style.display = 'none';
+        }
+
+        // HUD Controls
+        function toggleCRT() {
+            playClickSFX();
+            const crt = document.getElementById('crt');
+            const btn = event.target;
+            if (crt.style.display === 'none') {
+                crt.style.display = 'block';
+                btn.innerText = "CRT: ON";
+            } else {
+                crt.style.display = 'none';
+                btn.innerText = "CRT: OFF";
+            }
+        }
+
+        function toggleAudio() {
+            playClickSFX();
+            const btn = document.getElementById('audio-btn');
+            if (music.paused) {
+                music.play();
+                btn.innerText = "MUSIC: ON";
+            } else {
+                music.pause();
+                btn.innerText = "MUSIC: OFF";
+            }
+        }
+
+        // --- KONAMI CODE EASTER EGG ---
+        // Code: ↑ ↑ ↓ ↓ ← → ← → B A
+        const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        let konamiIndex = 0;
+
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+            if (key === konamiSequence[konamiIndex].toLowerCase()) {
+                konamiIndex++;
+                if (konamiIndex === konamiSequence.length) {
+                    triggerAceJumpscare();
+                    konamiIndex = 0;
+                }
+            } else {
+                konamiIndex = 0;
+            }
+
+            if (e.key === 'Escape') {
+                closeAceModal();
+            }
+        });
+
+        function triggerAceJumpscare() {
+            document.getElementById('ace-modal').style.display = 'flex';
+            // Slow down music pitch to create eerie distortion
+            music.playbackRate = 0.45;
+            music.volume = 0.9;
+            playClickSFX();
+        }
+
+        function closeAceModal() {
+            document.getElementById('ace-modal').style.display = 'none';
+            // Restore normal audio playback speed
+            music.playbackRate = 1.0;
             music.volume = 1.0;
         }
     </script>
